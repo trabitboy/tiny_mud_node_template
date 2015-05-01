@@ -2,14 +2,18 @@ var http = require('http');
 var url = require('url');
 var fs= require('fs');
 
-var room =[
+var room ={
+		h:4,
+		w:4,
+		map:
+		[1,1,1,1,
 		1,1,1,1,
 		1,1,1,1,
-		1,1,1,1
-];
+		1,1,1,1]
+		};
 
 function getroom (usr){
-	console.log("usr "+usr+" getting room " );
+	console.log("usr "+usr+" getting room " + room );
 	return room;
 }
 
