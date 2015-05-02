@@ -1,11 +1,13 @@
 
-var sendroomurl="api/sendroom";
+var sendroomurl="api/sendupdate";
 		
 var myurl="api/sendroom";
 var mydata={test:"test"};
 
-var p={x:0,y:0}; //player data
-var current ; // the room of the dungeon
+var p;//player data, returned from server
+var current ; //walls of the room of the dungeon, returned initially from the server
+var activeObjects; //chest, traps
+var otherplys; // in room
 
 //first time and every subsequent
 function getRoom(){
@@ -14,7 +16,7 @@ var ret;
 
 $.ajax({
   type: 'POST',
-  url: 'api/getroom?user=test',
+  url: 'api/enterroom',
   success:  function(rt) {
 	//alert('fetched data '+rt);
 	ret=rt;
@@ -29,8 +31,13 @@ $.ajax({
 
 function sendRoom(){
 	$.post(
-		 sendroomurl+"?user=test",
-         JSON.stringify(current),
+		 sendroomurl,
+		 //we don't send walls but active objects ( which might have changed )
+         JSON.stringify(
+				{
+				  ply:p,
+				  objs:activeObjects 
+				}),
          function(data) {
 //           alert("Response: " + data);
          }
@@ -87,8 +94,9 @@ $("#txtview").html(display);
 
 $(
 function(){
-
-current=getRoom();
+var data=getRoom();
+current=data.walls;
+p=data.user_data;
 pushDisplay();
 
 // var gameCanvas = document.getElementById('gameCanvas');
