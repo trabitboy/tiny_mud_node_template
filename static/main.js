@@ -7,7 +7,7 @@ var mydata={test:"test"};
 var p;//player data, returned from server
 var current ; //walls of the room of the dungeon, returned initially from the server
 var activeObjects; //chest, traps
-var otherplys; // in room
+var otherplys=[]; // in room
 
 //first time and every subsequent
 function getRoom(){
@@ -27,6 +27,58 @@ $.ajax({
 	return ret;
 
 };
+
+//updates on other players and objects
+//DOESN'T WORK
+ function getUpdate(){
+
+ 	$.ajax({
+		 url:"api/getupdate",
+		 //we don't send walls but active objects ( which might have changed )
+		  dataType: 'json',
+		  type:'POST',
+         data:
+		 JSON.stringify({
+				   userkey:p.userid
+				}),
+
+		 // JSON.stringify(
+				// )
+				// ,
+		  // async:false,
+         success:function(data) {
+			 //we update list of other active players
+			   //alert("Response: " + data);
+			   otherplys=
+			   // JSON.stringify(
+			   data.ret;
+			   // );
+			   pushDisplay();
+			 }
+		 }
+       );
+
+ 
+	// $.ajax({
+	  // type: 'POST',
+	  // url: 'api/getupdate',
+	  // data:	{
+					   // userkey:p.userid
+					// }),
+	  // success:  function(data) {
+		// //alert('fetched data '+rt);
+		// // ret=rt;
+			   // // otherplys=JSON.stringify(data);
+			   // // pushDisplay();
+	  // },
+	  // dataType: 'json',
+	  // async:false
+	// });
+ };
+
+
+
+
 
 
 function sendRoom(){
@@ -77,10 +129,21 @@ function pushDisplay(){
 	var display= "";
 	for(var j=0;j<current.h;j++){
 		for(var i=0;i<current.w;i++){
-			if( i===p.x && j===p.y){
-				display+=" x";
-			}else{
-				display+=" "+current.map[j*current.w +i];
+		//TODO additional condition to display players
+			var op = false;
+			for(var k=0;k<otherplys.length;k++){
+				if( otherplys[k].x===i && otherplys[k].y===j ){
+					op = true;
+					display+=" o";
+				}
+			}
+		
+			if(op===false){
+				if( i===p.x && j===p.y){
+					display+=" x";
+				}else{
+					display+=" "+current.map[j*current.w +i];
+				}
 			}
 		}
 		display+="<br/>"
@@ -98,6 +161,12 @@ var data=getRoom();
 current=data.walls;
 p=data.user_data;
 pushDisplay();
+
+window.setInterval(
+function(){
+	// alert('test');
+	getUpdate()
+},2000);
 
 // var gameCanvas = document.getElementById('gameCanvas');
 // var gameGfxCtx = gameCanvas.getContext('2d');

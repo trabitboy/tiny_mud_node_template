@@ -1,6 +1,8 @@
-//TODO send state to other players
-//TODO get state of other player from client
+//TODO get state of other player from client WIP
 //TODO display other players
+//TODO make it scheduled
+//TODO initially other plys not sent
+//TODO test mode with automatic users 
 
 
 var http = require('http');
@@ -30,7 +32,7 @@ var activeObjects=[
 var usersInRoom=[];
 
 //to get state of other players
-var getOtherUsers(key){
+function getOtherUsers(key){
 	var ret =[];
 	for( var i =0;i<usersInRoom.length;i++){
 		if( usersInRoom[i].userid !== key){
@@ -129,21 +131,26 @@ var server = http.createServer(function (req, res) {
 				// console.log(JSON.parse(jsonString));
 				console.log("data received" +JSON.parse(jsonString));
 				updateServerdataFromPlyAction(JSON.parse(jsonString));
+				res.end();
 			});
 		}
 		//res.end();
 		// res.
 	}
-	else
+	else // work around for the client to get notifications ( polled every nth second )
 	if( myrequrl.pathname === "/api/getupdate" ){
-		console.log("sendupdate");
-		if(req.method=='POST'){
+		console.log("getupdate");
+		if(req.method=='POST'){// post with userkey to defeat caching
 			var jsonString='';
 			req.on('data',function(data){
 				jsonString += data;
 			});
 			req.on('end',function(){
-				console.log("data received" +JSON.parse(jsonString));
+				console.log("data received" +jsonString);
+				var ret=JSON.stringify({ret:getOtherUsers(JSON.parse(jsonString).userkey)});
+				console.log("ret "+ret);
+				res.end(ret);
+				
 			});
 		}
 		//res.end();
